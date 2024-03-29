@@ -4,7 +4,7 @@ from train import train_vit, get_dataloader
 
 if __name__ == "__main__":
 
-    batch_size = 16
+    batch_size = 64
     epochs = 20
     lr = 0.001
 
@@ -18,8 +18,8 @@ if __name__ == "__main__":
         "num_classes": 10
     }
     
-    sm_1_path = "sm_1.ckpt"
-    sm_2_path = "sm_2.ckpt"
+    sm_1_path = "models/sm_1.ckpt"
+    sm_2_path = "models/sm_2.ckpt"
 
     results_sm1_path = "results_sm_1.png"
     results_sm2_path = "results_sm_2.png"

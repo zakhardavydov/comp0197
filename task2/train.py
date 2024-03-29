@@ -87,7 +87,7 @@ def train_vit(
         epochs: int = 2,
         lr: float = 0.001,
         sm: int = 1,
-        alpha: float = 0.2
+        alpha: float = 0.4
 ):
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("mps")
 
