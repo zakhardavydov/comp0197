@@ -5,7 +5,7 @@ from train import train_vit, get_dataloader
 if __name__ == "__main__":
 
     batch_size = 16
-    epochs = 1
+    epochs = 20
     lr = 0.001
 
     vit_16_params = {
@@ -20,10 +20,13 @@ if __name__ == "__main__":
     
     sm_1_path = "sm_1.ckpt"
     sm_2_path = "sm_2.ckpt"
+
+    results_sm1_path = "results_sm_1.png"
+    results_sm2_path = "results_sm_2.png"
     
     args = parse_args()
 
     train_dataloader, test_dataloader = get_dataloader(batch_size)
     
-    train_vit(sm_1_path, vit_16_params, train_dataloader, test_dataloader, batch_size, epochs, lr, sm=1)
-    train_vit(sm_2_path, vit_16_params, train_dataloader, test_dataloader, batch_size, epochs, lr, sm=2)
+    train_vit(sm_1_path, results_sm1_path, vit_16_params, train_dataloader, test_dataloader, batch_size, epochs, lr, sm=1)
+    train_vit(sm_2_path, results_sm2_path, vit_16_params, train_dataloader, test_dataloader, batch_size, epochs, lr, sm=2)

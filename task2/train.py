@@ -32,43 +32,54 @@ def get_dataloader(batch_size: int) -> tuple[DataLoader, DataLoader]:
 
 
 def save_test_images(dataloader, model, device, class_names, file_name="result.png"):
-    model.eval() 
+    model.eval()  # Ensure the model is in evaluation mode
 
-    collected_images = []
-    collected_labels = []
-    collected_preds = []
+    images_collected = 0
+    max_images = 36  # Total number of images we want to collect
 
-    with torch.no_grad():
+    # Prepare a tensor to hold collected images, labels, and predictions
+    collected_images = torch.empty((max_images, 3, 32, 32))  # Assuming CIFAR10 image dimensions (3, 32, 32)
+    collected_labels = torch.empty(max_images, dtype=torch.long)
+    collected_preds = torch.empty(max_images, dtype=torch.long)
+
+    with torch.no_grad():  # No need to track gradients
         for images, labels in dataloader:
-            if len(collected_images) >= 36:
-                break
-            
+            if images_collected >= max_images:
+                break  # Break if we've collected enough images
+
             images = images.to(device)
             labels = labels.to(device)
-            
+
             outputs = model(images)
             _, predicted = torch.max(outputs, 1)
-            
-            collected_images.append(images.cpu())
-            collected_labels.extend(labels.cpu())
-            collected_preds.extend(predicted.cpu())
 
-            collected_images = collected_images[:36]
-            collected_labels = collected_labels[:36]
-            collected_preds = collected_preds[:36]
+            # Determine how many images to collect from this batch
+            images_to_collect = min(max_images - images_collected, images.size(0))
 
-    images_tensor = torch.cat(collected_images, dim=0)
-    
-    img_grid = make_grid(images_tensor, nrow=6)
+            # Update the collections
+            collected_images[images_collected:images_collected+images_to_collect] = images[:images_to_collect].cpu()
+            collected_labels[images_collected:images_collected+images_to_collect] = labels[:images_to_collect].cpu()
+            collected_preds[images_collected:images_collected+images_to_collect] = predicted[:images_to_collect].cpu()
 
+            images_collected += images_to_collect
+
+    # Now that we have exactly 36 images, labels, and predictions, generate the grid
+    img_grid = make_grid(collected_images, nrow=6)  # Creates a 6x6 grid
+
+    # Save the grid of images
     save_image(img_grid, file_name)
+    print(f"Images saved to {file_name}")
 
-    for i in range(len(collected_images)):
-        print(f"Image {i+1}, label: {class_names[collected_labels[i]]}, predicted: {class_names[collected_preds[i]]}")
+    # For demonstration, print out the true and predicted labels for debugging
+    for i in range(max_images):
+        true_label = class_names[collected_labels[i].item()]
+        pred_label = class_names[collected_preds[i].item()]
+        print(f"Image {i+1}: True Label = {true_label}, Predicted Label = {pred_label}")
 
 
 def train_vit(
         model_path: str,
+        results_path: str,
         vit_params: dict[str, Any],
         train_dataloader: DataLoader,
         test_dataloader: DataLoader,
@@ -91,7 +102,7 @@ def train_vit(
     model.to(device)
 
     criterion = torch.nn.BCEWithLogitsLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.9)
 
     for epoch in range(epochs):
         model.train()
@@ -114,7 +125,7 @@ def train_vit(
 
             running_loss += loss.item()
             
-            if i % 2000 == 1999:
+            if i % 500 == 499:
                 print('[%d, %5d] loss: %.3f' %
                     (epoch + 1, i + 1, running_loss / 2000))
                 running_loss = 0.0
@@ -124,22 +135,28 @@ def train_vit(
 
             correct = 0
             total = 0
-            for i, (fv, labels) in enumerate(test_dataloader):
-                fv = fv.to(device)
+            for i, batch in enumerate(test_dataloader):
+                images, labels = mix.mix_up(batch)
+                images = images.to(device)
+
+                labels = labels.type(torch.long)
                 labels = labels.to(device)
-                outputs = model(fv)
-                loss = criterion(outputs, labels)
+
+                hot_labels = torch.nn.functional.one_hot(labels, num_classes=10).to(torch.float32)
+
+                outputs = model(images)
+                loss = criterion(outputs, hot_labels)
 
                 _, predicted = torch.max(outputs.data, 1)
 
-                total += labels.size(0)
+                total += hot_labels.size(0)
                 correct += (predicted == labels).sum().item()
             
             print(f"Epoch: {epoch} - Accuracy: {100 * correct / total} %")
 
     print('Training done.')
 
-    save_test_images(test_dataloader, model, device, class_names)
+    save_test_images(test_dataloader, model, device, class_names, results_path)
 
     torch.save(model.state_dict(), model_path)
 
