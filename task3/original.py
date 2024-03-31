@@ -4,6 +4,9 @@ import torch.nn.functional as F
 
 
 class OriginalNet(nn.Module):
+    """
+    Original CNN from tutorial
+    """
 
     def __init__(self):
         super().__init__()

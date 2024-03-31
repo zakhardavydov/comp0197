@@ -18,11 +18,15 @@ if __name__ == "__main__":
         "num_classes": 10
     }
     
+    # Take trained weights
     model_path = "models/sm_1.ckpt"
 
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
+    # Use the same criterion to calcualte validation loss
     criterion = torch.nn.BCEWithLogitsLoss()
 
+    # Get train, val and holdout loaders
     train_dataloader, test_dataloader, holdout_dataloader = get_dataloader(batch_size)
 
     state_dict = torch.load(model_path)
@@ -32,6 +36,7 @@ if __name__ == "__main__":
 
     model.to(device)
 
+    # Run evaluation on holdout dataset
     results = model_eval(model, holdout_dataloader, device, criterion, vit_16_params.get("num_classes"))
 
     print(f"Results - {results}")
