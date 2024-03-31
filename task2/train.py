@@ -136,7 +136,7 @@ def train_vit(
             correct = 0
             total = 0
             for i, batch in enumerate(test_dataloader):
-                images, labels = mix.mix_up(batch)
+                images, labels = batch
                 images = images.to(device)
 
                 labels = labels.type(torch.long)
