@@ -43,12 +43,11 @@ def fit_polynomial_ls(x, t, M):
         A[:, i] = x.pow(i)
     
     result = torch.linalg.lstsq(A, t.unsqueeze(1))
-    w = result.solution.squeeze()
-    
-    return w
+
+    return result.solution.squeeze()
 
 
-def fit_polynomial_sgd(x, t, M, lr, batch_size, epochs=50000, log_step=10000, momentum=0.9):
+def fit_polynomial_sgd(x, t, M, lr, batch_size, epochs=50000, log_step=10000):
     """
     Fit polynomial using SGD.
     x - input data
@@ -89,7 +88,7 @@ def fit_polynomial_sgd(x, t, M, lr, batch_size, epochs=50000, log_step=10000, mo
     return w.detach().squeeze()
 
 
-def fit_polynomial_sgd_a(x, t, max_M, lr, batch_size, epochs=500000, log_step=10000, momentum=0.9):
+def fit_polynomial_sgd_a(x, t, max_M, lr, batch_size, epochs=500000, log_step=10000):
     """
     Fit polynomial using SGD where M is a learnable parameter.
     We are going to do this by having a fixed number of terms equal to max_M.
