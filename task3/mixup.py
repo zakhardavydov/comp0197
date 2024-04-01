@@ -12,23 +12,24 @@ class BatchMixUp:
         """
         self._sampling_method = sampling_method
         self._alpha = alpha
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def sample(self):
         """
         Generate lambda based on the sampling method initiated
         """
         if self._sampling_method == 1:
-            return Beta(self._alpha, self._alpha).sample()
-        return torch.rand(1)
+            return Beta(self._alpha, self._alpha).sample().to(self.device)
+        return torch.rand(1).to(self.device)
 
     def mix_up(self, batch):
         """
         Mix up that works within the batch
         """
-        img, labels = batch
+        img, labels = batch[0].to(self.device), batch[1].to(self.device)
 
         batch_size = img.size()[0]
-        index = torch.randperm(batch_size)
+        index = torch.randperm(batch_size).to(self.device)
 
         l = self.sample()
 

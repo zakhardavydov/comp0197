@@ -32,7 +32,7 @@ if __name__ == "__main__":
     # Train original net with sampling method == 1
     train(
         get_model(params={}, original=True),
-        "models/original_sm_1.ckpt",
+        "models/original_mix_sm_1.ckpt",
         train_dataloader,
         test_dataloader,
         holdout_dataloader,
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     # Train original net with sampling method == 2
     train(
         get_model(params={}, original=True),
-        "models/original_sm_2.ckpt",
+        "models/original_mix_sm_2.ckpt",
         train_dataloader,
         test_dataloader,
         holdout_dataloader,
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     # Train ViT with sampling method == 1
     train(
         get_model(params=vit_16_params),
-        "models/vit_sm_1.ckpt",
+        "models/vit_mix_sm_1.ckpt",
         train_dataloader,
         test_dataloader,
         holdout_dataloader,
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     # Train ViT with sampling method == 2
     train(
         get_model(params=vit_16_params),
-        "models/vit_sm_2.ckpt",
+        "models/vit_mix_sm_2.ckpt",
         train_dataloader,
         test_dataloader,
         holdout_dataloader,
