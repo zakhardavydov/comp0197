@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 def polynomial_fun(w, x):
     """
-    Very basic polynomial
+    Very basic polynomial.
     w - param tensor
     x - input tensor
     """
@@ -14,7 +14,7 @@ def polynomial_fun(w, x):
 
 def polynomial_fun_soft(w, M, x, max_M):
     """
-    Polynomial where degree can be not an int...
+    Polynomial where terms are weighted with softmax of M.
     w - param tensor
     M - degree tensor
     x - input tensor
@@ -34,7 +34,7 @@ def polynomial_fun_soft(w, M, x, max_M):
 
 def fit_polynomial_ls(x, t, M):
     """
-    Fit polynomial solving for minimal least squares
+    Fit polynomial solving for minimal least squares.
     """
     N = x.shape[0]
     A = torch.zeros((N, M + 1), dtype=torch.float64)
@@ -50,7 +50,7 @@ def fit_polynomial_ls(x, t, M):
 
 def fit_polynomial_sgd(x, t, M, lr, batch_size, epochs=50000, log_step=10000, momentum=0.9):
     """
-    Fit polynomial using SGD
+    Fit polynomial using SGD.
     x - input data
     t - observed values
     M - number of degrees in the poly
@@ -143,7 +143,7 @@ def fit_polynomial_sgd_a(x, t, max_M, lr, batch_size, epochs=500000, log_step=10
 
 def rmse(predictions, targets):
     """
-    RMSE implementation that trims prediction dimensions to targets in case their uneven
+    RMSE implementation that trims prediction dimensions to targets in case they are uneven.
     """
     if predictions.shape[0] > targets.shape[0]:
         predictions = predictions[:targets.shape[0]]
