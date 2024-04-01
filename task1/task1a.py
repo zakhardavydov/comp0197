@@ -8,12 +8,14 @@ from fun import *
 
 if __name__ == "__main__":
 
+    # For reproducibility
     torch.manual_seed(42)
     
     lr = 0.01
     minibatch_size = 36
     epochs = 100000
 
+    # As in original task1, generate data in accordance with requirements
     n_train, n_test = 20, 10
     true_w = torch.tensor([1, 2, 3], dtype=torch.float64)
 
@@ -23,6 +25,7 @@ if __name__ == "__main__":
     y_train_true = polynomial_fun(true_w, x_train)
     y_test_true = polynomial_fun(true_w, x_test)
 
+    # Generate training data by applying some noising
     noise_std = 0.5
     t_train = y_train_true + torch.randn(n_train, dtype=torch.float64) * noise_std
     t_test = y_test_true + torch.randn(n_test, dtype=torch.float64) * noise_std
@@ -32,6 +35,7 @@ if __name__ == "__main__":
     std_diff_a_train = diff_a_train.std().item()
     y_rmse = rmse(t_train, y_train_true)
 
+    # Report difference between observed Y and true Y
     print("Observered Y vs true Y:")
     print(f"    Mean difference: {mean_diff_a_train}")
     print(f"    Standard deviation: {std_diff_a_train}")
@@ -39,10 +43,13 @@ if __name__ == "__main__":
 
     print("-------------------")
 
+    # Experiments with larger M did not cause loss to converge
     max_M = 4
     
+    # Fit using adjusted SGD considering M as optimzable parameter as well
     w_sgd, M = fit_polynomial_sgd_a(x_train, t_train, max_M, lr, minibatch_size, epochs=epochs)
 
+    # Run evaluation on train AND test dataset
     with torch.no_grad():
         degrees = torch.arange(max_M + 1).double()
         M_soft = F.softmax(M * degrees, dim=0)
@@ -58,6 +65,7 @@ if __name__ == "__main__":
     test_mean = diff_test.mean().item()
     test_sd = diff_test.std().item()
 
+    # Compare difference on both train AND test datasets
     print("Train mean difference: ", train_mean)
     print("Train standard deviation: ", train_sd)
     print("Test mean difference: ", test_mean)

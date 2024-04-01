@@ -1,13 +1,28 @@
+import torch
+
 from utils import parse_args
 from train import train_vit, get_dataloader
 
 
 if __name__ == "__main__":
 
-    batch_size = 64
+    # Parse args
+    args = parse_args()
+
+    # For reproducibility
+    torch.manual_seed(42)
+
+    # Basic hyperparameters used for training
+    # Batch size here is 16 as it produces the nice grid
+    # In reality I trained with batch_size 64, both sampling method produce around 85% accuracy
+    batch_size = 16
+
+    # As per requirements, train for 20 epochs
+    # In reality, I trained for 100 epochs
     epochs = 20
     lr = 0.001
 
+    # ViT params taken out, so it is easier to experiment
     vit_16_params = {
         "image_size": 32,
         "patch_size": 16,
@@ -18,15 +33,23 @@ if __name__ == "__main__":
         "num_classes": 10
     }
     
-    sm_1_path = "models/sm_1.ckpt"
-    sm_2_path = "models/sm_2.ckpt"
+    # Path to save the final weights
+    weights_path = f"models/sm_{args.sampling_method}.ckpt"
 
-    results_sm1_path = "results_sm_1.png"
-    results_sm2_path = "results_sm_2.png"
-    
-    args = parse_args()
+    # Path to save inference on test images
+    results_sm_path = f"results_sm_{args.sampling_method}.png"
 
+    # Get dataloaders with entire dataset
     train_dataloader, test_dataloader = get_dataloader(batch_size)
     
-    train_vit(sm_1_path, results_sm1_path, vit_16_params, train_dataloader, test_dataloader, batch_size, epochs, lr, sm=1)
-    train_vit(sm_2_path, results_sm2_path, vit_16_params, train_dataloader, test_dataloader, batch_size, epochs, lr, sm=2)
+    # Train!!!
+    train_vit(
+        weights_path,
+        results_sm_path,
+        vit_16_params,
+        train_dataloader,
+        test_dataloader,
+        epochs,
+        lr,
+        sm=args.sampling_method
+    )

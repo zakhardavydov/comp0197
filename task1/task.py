@@ -10,11 +10,13 @@ from fun import *
 
 if __name__ == "__main__":
 
+    # For reproducibility
     torch.manual_seed(42)
     
     lr = 0.01
     minibatch_size = 36
 
+    # As per task requirements
     n_train, n_test = 20, 10
     true_w = torch.tensor([1, 2, 3], dtype=torch.float64)
 
@@ -24,10 +26,12 @@ if __name__ == "__main__":
     y_train_true = polynomial_fun(true_w, x_train)
     y_test_true = polynomial_fun(true_w, x_test)
 
+    # Apply noising to generate training data
     noise_std = 0.5
     t_train = y_train_true + torch.randn(n_train, dtype=torch.float64) * noise_std
     t_test = y_test_true + torch.randn(n_test, dtype=torch.float64) * noise_std
 
+    # Calculate basic metrics for train data
     diff_a_train = t_train - y_train_true
     mean_diff_a_train = diff_a_train.mean().item()
     std_diff_a_train = diff_a_train.std().item()
@@ -40,8 +44,10 @@ if __name__ == "__main__":
 
     print("-------------------")
 
+    # Degrees that we are going to benchmark
     degrees = [2, 3, 4]
 
+    # Init dicts in we are going to store metrics for each degree
     w_estimates = {}
     y_pred_train = {}
     y_pred_test = {}
@@ -67,6 +73,7 @@ if __name__ == "__main__":
     w_poly_rmse = {}
     w_sgd_rmse = {}
     
+    # Fit polynomial minimising least squares
     for degree in degrees:
         print("Fitting poly for degree: ", degree)
         t0 = time.time()
@@ -87,6 +94,7 @@ if __name__ == "__main__":
 
         print("-------------------")
     
+    # Fit using SGD
     for degree in degrees:
         print("Fitting SGD for degree: ", degree)
         t0 = time.time()
@@ -112,6 +120,7 @@ if __name__ == "__main__":
 
     print("Comparison between Poly and SGD:")
     
+    # Print out comparison table between degrees and optimisation method
     for degree in degrees:
         print(f"Metrics for degree: {degree}")
         metrics = [
