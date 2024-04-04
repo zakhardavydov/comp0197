@@ -10,9 +10,8 @@ import torch.nn as nn
 from PIL import Image
 from torchvision import transforms
 from torch.utils.data import DataLoader, random_split
-from torchvision.utils import make_grid, save_image
 
-from mixup import BatchMixUp
+from mixup import MixUp
 
 
 def get_dataloader(batch_size: int, holdout_size: float = 0.2, train_size: float = 0.9) -> tuple[DataLoader, DataLoader, DataLoader]:
@@ -55,7 +54,15 @@ def model_eval(
         device: torch.device,
         criterion: torch.nn.Module,
         num_classes: int = 10
-    ) -> tuple[float, float]:
+) -> tuple[float, float]:
+    """
+    Evaluate the model on the dataloader and return accuracy, macro precision/recall/f1 and loss.
+    model - model to evaluate
+    data - dataloader to evaluate on
+    device - device to run on
+    criterion - loss function to use
+    num_classes - how many classes are there
+    """
     with torch.no_grad():
         model.eval()
 
@@ -136,6 +143,20 @@ def train(
         num_classes: int = 10,
         log_step: int = 500
 ):
+    """
+    Similar training loop to task 2, but with more metrics and more flexibility on the model under training.
+    model - pre-inited model to train
+    model_path - where to save the model
+    train_dataloader - dataloader for training data
+    test_dataloader - dataloader for testing data
+    holdout_dataloader - dataloader for holdout data
+    epochs - how many epochs to train
+    lr - learning rate
+    sm - sampling method for mixup
+    alpha - alpha for mixup
+    log_step - how often to print the loss
+    """
+
     print(f"---------- TRAINING {model_path} (sampling method = {sm}, alpha = {alpha}) ----------")
     print(f"CUDA: {torch.cuda.is_available()}")
     
@@ -143,7 +164,7 @@ def train(
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     # Init MixUp class
-    mix = BatchMixUp(sampling_method=sm, alpha=alpha)
+    mix = MixUp(sampling_method=sm, alpha=alpha)
 
     # Move model to device
     model.to(device)

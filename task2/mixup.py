@@ -4,7 +4,7 @@ from torch.distributions import Beta
 from torchvision.utils import make_grid, save_image
 
 
-class BatchMixUp:
+class MixUp:
 
     def __init__(self, sampling_method: int = 1, alpha=0.2):
         """

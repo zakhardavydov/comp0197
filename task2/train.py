@@ -9,13 +9,17 @@ from torch.utils.data import DataLoader
 from torchvision.utils import make_grid, save_image
 
 from vit import get_vit
-from mixup import BatchMixUp
+from mixup import MixUp
 
 
 class_names = ["plane", "car", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck"]
 
 
 def get_dataloader(batch_size: int) -> tuple[DataLoader, DataLoader]:
+    """
+    Get dataloaders for CIFAR10 dataset
+    batch_size - how many images in one batch
+    """
     # Normalize images as per tutorial
     transform = transforms.Compose(
         [
@@ -35,6 +39,14 @@ def get_dataloader(batch_size: int) -> tuple[DataLoader, DataLoader]:
 
 
 def save_images(dataloader, model, device, class_names, path="result.png", max_images=36):
+    """
+    Run inference and save first max_images to a grid.
+    dataloader - where we are taking the images from
+    model - model to use for inference
+    class_names - names of the classes for printing
+    path - where to save the grid
+    max_images - how many images to save
+    """
     model.eval()
 
     # We only want a grid that is 6x6, so we are going to iterate over images until we have it
@@ -97,11 +109,25 @@ def train_vit(
         alpha: float = 0.3,
         log_step: int = 500
 ):
+    """
+    Training loop for ViT model.
+    model_path - where to save the model
+    results_path - where to save the results image grid
+    vit_params - parameters for the ViT model
+    train_dataloader - dataloader for training data
+    test_dataloader - dataloader for testing data
+    epochs - how many epochs to train
+    lr - learning rate
+    sm - sampling method for mixup
+    alpha - alpha for mixup
+    log_step - how often to print the loss
+    """
+    
     # If we have GPU, use it
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     # Init the mixup
-    mix = BatchMixUp(sampling_method=sm, alpha=alpha)
+    mix = MixUp(sampling_method=sm, alpha=alpha)
 
     # Get first batch for mixup viz
     dataiter = iter(train_dataloader)
@@ -124,8 +150,10 @@ def train_vit(
         running_loss = 0.0
         
         for i, (images, labels) in enumerate(train_dataloader, 0):
+            images, labels = mix.mix_up(batch)
             images = images.to(device)
 
+            # Reformat labels into hot encoding
             labels = labels.type(torch.long)
 
             # We want hot encoding, not CiFAR labels

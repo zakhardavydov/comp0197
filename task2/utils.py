@@ -3,7 +3,7 @@ import argparse
 
 def parse_args():
     """
-    Parse arguments as per requirements
+    Parse arguments as per requirements.
     """
     parser = argparse.ArgumentParser(description="Train ViT for COMP0197 group task 2.")
 
