@@ -26,10 +26,10 @@ if __name__ == "__main__":
     vit_16_params = {
         "image_size": 32,
         "patch_size": 16,
-        "num_layers": 12,
-        "num_heads": 12,
-        "hidden_dim": 768,
-        "mlp_dim": 3072,
+        "num_layers": 8,
+        "num_heads": 8,
+        "hidden_dim": 256,
+        "mlp_dim": 512,
         "num_classes": 10
     }
     
